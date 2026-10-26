@@ -14,6 +14,8 @@ Description: Computes confidence intervals that are consistent with
     adjusted p-values agree by construction. The first release supports
     contrasts produced by the 'emmeans' package.
 License: GPL (>= 3)
+URL: https://github.com/jiarmendano/fcrci
+BugReports: https://github.com/jiarmendano/fcrci/issues
 Encoding: UTF-8
 Language: en-US
 Depends:

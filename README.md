@@ -1,6 +1,7 @@
 # fcrci
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/jiarmendano/fcrci/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jiarmendano/fcrci/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 **FDR-consistent confidence intervals for multiple comparisons.**
@@ -18,12 +19,12 @@ p-value is at most `1 - level`.
 
 ## Installation
 
-The package is not yet on CRAN. To install it from a local copy of the
-source:
+The package is not yet on CRAN. To install the development version from
+GitHub:
 
 ``` r
 # install.packages("remotes")
-remotes::install_local("path/to/fcrci", build_vignettes = TRUE)
+remotes::install_github("jiarmendano/fcrci", build_vignettes = TRUE)
 ```
 
 The package itself depends only on base R; 'emmeans' is needed to use
