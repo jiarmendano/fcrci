@@ -1,0 +1,31 @@
+Package: fcrci
+Type: Package
+Title: FDR-Consistent Confidence Intervals for Multiple Comparisons
+Version: 0.1.0
+Authors@R:
+    person("Joaquín", "Armendano", , "armendano.joaquin@gmail.com",
+           role = c("aut", "cre", "cph"))
+Description: Computes confidence intervals that are consistent with
+    false discovery rate (FDR) adjusted p-values, using the false coverage-statement
+    rate (FCR) adjustment of Benjamini and Yekutieli (2005)
+    <doi:10.1198/016214504000001907>. When p-values are adjusted with the
+    Benjamini-Hochberg or Benjamini-Yekutieli procedures, the intervals exclude
+    the null value exactly for the hypotheses that are rejected, so intervals and
+    adjusted p-values agree by construction. The first release supports
+    contrasts produced by the 'emmeans' package.
+License: GPL (>= 3)
+Encoding: UTF-8
+Language: en-US
+Depends:
+    R (>= 4.1.0)
+Imports:
+    stats
+Suggests:
+    emmeans (>= 1.10.0),
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.1.0

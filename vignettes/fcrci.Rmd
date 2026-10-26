@@ -1,0 +1,183 @@
+---
+title: "FDR-consistent confidence intervals for emmeans contrasts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{FDR-consistent confidence intervals for emmeans contrasts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = requireNamespace("emmeans", quietly = TRUE)
+)
+```
+
+## The problem
+
+Adjusting p-values for the false discovery rate (FDR) with the
+Benjamini-Hochberg procedure is common when many comparisons are made. In
+'emmeans', this is done with `adjust = "fdr"`. However, FDR adjustments are
+defined for tests, not for confidence intervals, so `confint()` replaces them
+with a Bonferroni adjustment. The intervals are then more conservative than
+the p-values, and the two can lead to different conclusions.
+
+Consider the `chickwts` data (base R): chick weights after six weeks on six
+feed supplements, giving 15 pairwise comparisons.
+
+```{r setup}
+library(fcrci)
+library(emmeans)
+
+fit <- lm(weight ~ feed, data = chickwts)
+prs <- pairs(emmeans(fit, ~ feed), adjust = "fdr")
+```
+
+The FDR-adjusted p-values:
+
+```{r}
+test(prs)
+```
+
+And the confidence intervals of the same contrasts:
+
+```{r}
+confint(prs)
+```
+
+Note the footer: the intervals were adjusted with the Bonferroni method, the
+only indication that the requested FDR adjustment was not applied to them. For
+example, `horsebean - linseed` has an FDR-adjusted p-value of about 0.023, yet
+its interval includes zero. A reader comparing the two tables would not know
+whether that difference is significant.
+
+## FCR-adjusted intervals
+
+Benjamini and Yekutieli (2005) defined the false coverage-statement rate (FCR),
+the interval counterpart of the FDR: the expected proportion of intervals that
+fail to cover their parameter among the intervals reported for the selected
+(significant) parameters. They showed that if $R$ of $m$ hypotheses are
+rejected by the Benjamini-Hochberg procedure at level $q$, constructing
+marginal intervals at confidence level
+
+$$1 - \frac{R\,q}{m}$$
+
+controls the FCR at level $q$ when the test statistics are independent.
+Since the procedure
+rejects exactly the hypotheses with $p_i \le Rq/m$, these intervals exclude
+the null value exactly for the rejected hypotheses.
+
+`confint_fcr()` applies this adjustment to an 'emmeans' object, reading the FDR
+method from the `adjust` setting used to create it:
+
+```{r}
+res <- confint_fcr(prs)
+res
+```
+
+Now `horsebean - linseed` has an interval that excludes zero, matching its
+p-value, and `casein - meatmeal` (FDR-adjusted p = 0.057) has an interval that
+includes zero. The footer reports the confidence level used, $1 - 11 \times
+0.05 / 15 \approx 0.963$. The details are available with `fcr_info()`:
+
+```{r}
+fcr_info(res)
+```
+
+Because the intervals are computed by 'emmeans' itself (with
+`adjust = "none"` and the FCR level), degrees of freedom, back-transformations
+and one-sided intervals behave exactly as in 'emmeans'. The common shortcut
+`emmeans(fit, pairwise ~ feed, adjust = "fdr")` also works: `confint_fcr()`
+then uses its `contrasts` component.
+
+## Ratios and families defined by `by` variables
+
+The `pigs` data from 'emmeans' records the concentration of leucine in pigs
+fed three protein sources at four protein percentages. On the log scale,
+differences become ratios after back-transformation. Here each percentage is a
+separate family of three comparisons, as in 'emmeans':
+
+```{r}
+fit2 <- lm(log(conc) ~ source * factor(percent), data = pigs)
+prs2 <- pairs(emmeans(fit2, ~ source | percent), adjust = "fdr")
+res2 <- confint_fcr(prs2, type = "response")
+res2
+```
+
+Each family receives its own confidence level, depending on how many of its
+hypotheses were rejected. An interval for a ratio excludes 1 exactly when the
+FDR-adjusted p-value is at most 0.05. When a family has no rejections, the
+level is computed with $R = 1$ (the Bonferroni level), so that no interval
+excludes the null value. Benjamini and Yekutieli construct no intervals in that
+case; this fallback is a convention of the package that keeps the table
+complete.
+
+```{r}
+fcr_info(res2)
+```
+
+To treat all 12 comparisons as a single family, use `by = NULL`, as you would
+in `summary()`:
+
+```{r}
+fcr_info(confint_fcr(prs2, type = "response", by = NULL))
+```
+
+## Dependent contrasts: the Benjamini-Yekutieli version
+
+The FCR guarantee of Benjamini and Yekutieli (2005) for the level above
+assumes independent test statistics. Contrasts estimated from the same model
+are usually correlated, and t statistics that share a variance estimate are
+dependent even when the estimates are not. If a guarantee under any dependence structure is required,
+use the Benjamini-Yekutieli procedure, either through `adjust = "BY"` in
+'emmeans' or with `method = "BY"`:
+
+```{r}
+fcr_info(confint_fcr(prs, method = "BY"))
+```
+
+The level now includes the factor $\sum_{i=1}^{m} 1/i$, which makes both the
+p-values and the intervals more conservative. The intervals and p-values still
+agree with each other.
+
+## What the intervals mean
+
+* For the significant contrasts, the intervals control the FCR (on average, at
+  most a proportion $q$ of them fail to cover the true value) when the test
+  statistics are independent (`"BH"`) or under any dependence (`"BY"`). For
+  correlated contrasts with `"BH"`, this is not a formal guarantee.
+* Intervals are also shown for the non-significant contrasts, so that the
+  table is complete and consistent with the p-values. The FCR criterion makes
+  no coverage statement about these intervals.
+* A single, unadjusted 95% interval should not be read from this table; use
+  `confint(prs, adjust = "none")` for that.
+
+## Using the level elsewhere
+
+`fcr_level()` works with any vector of p-values, so the same adjustment can be
+applied to results from other packages, as long as the intervals and p-values
+are based on the same test statistic:
+
+```{r}
+p <- c(0.0004, 0.003, 0.012, 0.04, 0.21, 0.67)
+fcr_level(p, q = 0.05)
+```
+
+## References
+
+Benjamini, Y. and Hochberg, Y. (1995). Controlling the false discovery rate: a
+practical and powerful approach to multiple testing. *Journal of the Royal
+Statistical Society: Series B*, 57(1), 289-300.
+<https://doi.org/10.1111/j.2517-6161.1995.tb02031.x>
+
+Benjamini, Y. and Yekutieli, D. (2005). False discovery rate-adjusted multiple
+confidence intervals for selected parameters. *Journal of the American
+Statistical Association*, 100(469), 71-81.
+<https://doi.org/10.1198/016214504000001907>
+
+Jung, K., Friede, T. and Beissbarth, T. (2011). Reporting FDR analogous
+confidence intervals for the log fold change of differentially expressed
+genes. *BMC Bioinformatics*, 12, 288.
+<https://doi.org/10.1186/1471-2105-12-288>

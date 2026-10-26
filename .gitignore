@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+inst/doc
+/doc/
+/Meta/
+*.tar.gz
+fcrci.Rcheck/
+CLAUDE.md
+.claude/
