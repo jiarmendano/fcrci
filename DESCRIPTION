@@ -4,7 +4,8 @@ Title: FDR-Consistent Confidence Intervals for Multiple Comparisons
 Version: 0.1.0
 Authors@R:
     person("Joaquín", "Armendano", , "armendano.joaquin@gmail.com",
-           role = c("aut", "cre", "cph"))
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0002-0319-1127"))
 Description: Computes confidence intervals that are consistent with
     false discovery rate (FDR) adjusted p-values, using the false coverage-statement
     rate (FCR) adjustment of Benjamini and Yekutieli (2005)
