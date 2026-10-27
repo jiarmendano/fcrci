@@ -78,6 +78,11 @@ Code (Anthropic), under manual review.
 
 ## References
 
+Benjamini, Y. and Hochberg, Y. (1995). Controlling the false discovery rate: a
+practical and powerful approach to multiple testing. *Journal of the Royal
+Statistical Society: Series B*, 57(1), 289-300.
+<https://doi.org/10.1111/j.2517-6161.1995.tb02031.x>
+
 Benjamini, Y. and Yekutieli, D. (2005). False discovery rate-adjusted multiple
 confidence intervals for selected parameters. *Journal of the American
 Statistical Association*, 100(469), 71-81.

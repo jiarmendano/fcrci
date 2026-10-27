@@ -8,16 +8,18 @@ This is a new submission.
 
 * This is a new submission.
 
-Possibly misspelled words in DESCRIPTION are the names of the authors of
-the cited references (Benjamini, Hochberg, Yekutieli) and the abbreviations
-FCR and FDR, which are expanded in the Description field.
+The possibly misspelled words in DESCRIPTION are Benjamini, Hochberg and
+Yekutieli, the authors of the cited references, and FCR, the abbreviation
+of false coverage-statement rate, which is defined in the Description
+field.
 
 ## Test environments
 
 * Windows 11, R 4.5.3 (local), with 'emmeans' 2.0.4
+* win-builder (R-release 4.6.1)
 * R-hub: linux (R-devel), windows (R-devel), macos-arm64 (R-devel)
 * GitHub Actions (check-standard): ubuntu-latest (R-devel, R-release,
-  R-oldrel), macos-latest (R-release), windows-latest (R-release)
+  R-oldrel-1), macos-latest (R-release), windows-latest (R-release)
 
 ## Downstream dependencies
 
